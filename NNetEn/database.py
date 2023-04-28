@@ -8,7 +8,7 @@ Created on Thu Mar 23 10:11:35 2023
 """
 
 import logging
-# Настройка формата логов программы
+
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s]:%(levelname)s: %(message)s')
@@ -18,11 +18,13 @@ from numba import njit
 from datetime import datetime
 import os
 
-dir = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.path.join(dir, 'Database')
-
-# Reading their MNIST images
 def read_mnist_images(file_name : str, limit=1):
+    """
+    Reading their MNIST images
+        :param file_name: Image file name mnist. Format idx3-ubyte
+        :param limit: Usage fraction of the selected database
+        :return: Linear array containing image (0 to 255)
+    """
     intType = np.dtype('int32').newbyteorder('>')
     nMetaDataBytes = 4 * intType.itemsize
     images = np.fromfile(file_name, dtype='ubyte')
@@ -40,8 +42,13 @@ def read_mnist_images(file_name : str, limit=1):
 
     return np.array(images)
 
-# Reading MNIST values
 def read_mnist_labels(file_name : str, limit=1):
+    """
+    Reading their MNIST labels
+        :param file_name: Labels file name mnist. Format idx1-ubyte
+        :param limit: Usage fraction of the selected database
+        :return: Linear array containing labels
+    """
     intType = np.dtype('int32').newbyteorder('>')
     labels = np.fromfile(file_name, dtype='ubyte')[2 * intType.itemsize:]
     # Restriction on reading data
@@ -50,8 +57,12 @@ def read_mnist_labels(file_name : str, limit=1):
 
     return labels
 
-# Loading a Pattern
 def T_pattern_load(pattern_file : str):
+    """
+    Loading a Pattern
+        :param pattern_file: Pattern file name mnist. Format .VM
+        :return: A linear array containing a pattern of indexes, for converting images to mnist
+    """
     logging.debug('Loading pattern file %s', pattern_file)
     try:
         with open(pattern_file) as file:
@@ -71,13 +82,24 @@ def T_pattern_load(pattern_file : str):
 
 @njit(cache=True, fastmath=True)
 def T_pattern_application(data : np.ndarray, pattern : np.ndarray):
+    """
+    Applying a pattern on one element mnist
+        :param data: Array containing image mnist
+        :param pattern: Array containing pattern
+        :return: Image MNIST converted
+    """
     out_data = np.empty_like(data)
     for i in range(data.size):
         out_data[i] = data[pattern[i]-1]
     return out_data
 
-# Применение паттерна навсю базу
 def data_pattern_transform(database, pattern_file :str):
+    """
+    The function of applying a pattern to the entire image database
+        :param database: database containing image mnist
+        :param pattern_file: Path to the pattern file
+        :return: Prepared database MNIST (0 to 255) + bias
+    """
     pattern = T_pattern_load(pattern_file)
     logging.debug('Pattern - %s application', pattern_file)
     database_pattern = np.empty_like(database)
@@ -88,24 +110,14 @@ def data_pattern_transform(database, pattern_file :str):
 
     return database_pattern
 
-# Loading a Time Series
-def read_data_xn(path_data_xn):
-    logging.debug('Loading file %s', path_data_xn)
-    data_list = []
-    try:
-        with open(path_data_xn) as file:
-            for line in file:
-                st_list = line.replace(',', '.').split('\t')
-                data_list.append(float(st_list[0]))
-        data_list = np.array(data_list, dtype='float64')
-    except Exception as e:
-        logging.info('Error read file %s', path_data_xn)
-        exit(0)
-
-    return data_list
-
-# Чтение ковидной базы
 def read_database_covid19(file_name: str, limit=1):
+    """
+    Covid-19 database reading function
+        :param file_name: Path to the SARS-CoV-2-RBV1 file
+        :param limit: usage fraction of the selected dataset
+        :return: train_data and test_data: Array with data and labels;
+                 max_data and min_data: Array of maximum and minimum database values along axis 0.
+    """
     try:
         train_data = np.loadtxt(file_name, delimiter='\t')
     except:
@@ -136,11 +148,19 @@ def read_database_covid19(file_name: str, limit=1):
 
     return train_data, test_data, max_data, min_data
 
-# Чтение базы MNIST
 def read_database_mnist(file_name_image: str,
                         file_name_labels: str,
                         file_pattern : str,
                         limit=1):
+    """
+    MNIST database reading function
+        :param file_name_image: Path to the image mnist
+        :param file_name_labels: Path to the label mnist
+        :param file_pattern: Path to the pattern
+        :param limit: usage fraction of the selected dataset
+        :return: train_data, test_data and test_data_array: Array with data and labels;
+                max_data and min_data: Array of maximum and minimum database values along axis 0.
+    """
     try:
         train_data = read_mnist_images(file_name_image,
                                        limit)
@@ -164,23 +184,15 @@ def read_database_mnist(file_name_image: str,
 
     return train_data, test_data, test_data_array, max_data, min_data
 
-
-def write_result_for_txt(NNetEn, time_train, epoch, N, MU,
-                         Length_TS, metric):
-    result_name = 'log.txt'
-    if not os.path.isfile(result_name):
-        with open(result_name, mode='a', encoding='utf-8') as file:
-            file.write('Timestamp\tNNetEn\tTime\tEpoch\t'
-                       'W1 Size\tMU\tLength Time Series\tMetric\n')
-    
-    with open(result_name, mode='a', encoding='utf-8') as file:
-        file.write('[{}]\t{:.4f}\t{:.3f}\t{}\t{}\t{}\t{}\t{}\n'.
-                   format(datetime.now(), NNetEn, time_train,
-                          epoch, N, MU, Length_TS, metric))
-
 @njit(cache=True, fastmath=True)
-# Нормализация одного массива
 def normalization(input, max_data, min_data):
+    """
+    Single element normalization
+        :param input: Database element
+        :param max_data: Array of maximum database values
+        :param min_data: Array of minimal database values
+        :return: Normalized array (0 to 1)
+    """
     norm_data = input.copy()
     norm_data[0] = 1
     for i in range(1, input.size):
@@ -195,63 +207,19 @@ def normalization(input, max_data, min_data):
 
 # Step 2
 def format_norm_database(database, max_data, min_data):
+    """
+    Database normalization function
+        :param database: Array containing database elements
+        :param max_data: Array of maximum database values
+        :param min_data: Array of minimal database values
+        :return: Normalized database (0 to 1)
+    """
     norm_database = np.empty_like(database, dtype=np.float64)
     for index, data in enumerate(database):
         norm_database[index] = normalization(np.float64(data),
                                              np.float64(max_data),
                                              np.float64(min_data))
     return norm_database
-
-def load_mnist_database(limit=1):
-    # Step 1
-    MNIST_TRAIN_IMAGE = os.path.join(DATABASE_PATH,
-                                     'train-images.idx3-ubyte')
-    MNIST_TRAIN_LABELS = os.path.join(DATABASE_PATH,
-                                       'train-labels.idx1-ubyte')
-    MNIST_TEST_IMAGE = os.path.join(DATABASE_PATH,
-                                     't10k-images.idx3-ubyte')
-    MNIST_TEST_LABELS = os.path.join(DATABASE_PATH,
-                                      't10k-labels.idx1-ubyte')
-    VM_PATTERN_NAME = os.path.join(DATABASE_PATH, 'T-pattern-3.VM')
-
-    # Train database
-    dbase, test_db, test_db_array, max_data, min_data = \
-        read_database_mnist(MNIST_TRAIN_IMAGE,
-                               MNIST_TRAIN_LABELS,
-                               VM_PATTERN_NAME, limit)
-    # Test database
-    dbase_T, test_db_T, test_db_array_T, max_data, min_data = \
-        read_database_mnist(MNIST_TEST_IMAGE,
-                               MNIST_TEST_LABELS,
-                               VM_PATTERN_NAME, limit)
-    # Step 2
-    logging.debug('Step 2. Formation the normalization database')
-
-    # Train labels
-    #FIXME
-    norm_data = dbase / 255
-    norm_data[:,0] = 1
-
-    #norm_data = format_norm_database(dbase, max_data, min_data)
-    # Test labels
-    #FIXME
-    norm_data_T = dbase_T / 255
-    norm_data_T[:,0] = 1
-    #norm_data_T = format_norm_database(dbase_T, max_data, min_data)
-
-    return norm_data, test_db_array, norm_data_T, test_db_array_T
-
-def load_covid19_database(limit=1):
-    DATABASE_COVID19 = os.path.join(DATABASE_PATH,
-                            'Base_0_balance_dot.txt')
-    # Step 1
-    dbase, test_db, max_data, min_data = \
-        read_database_covid19(DATABASE_COVID19, limit)
-    # Step 2
-    logging.debug('Step 2. Formation the normalization database')
-    norm_data = format_norm_database(dbase, max_data, min_data)
-
-    return norm_data, test_db
 
 def main():
     pass

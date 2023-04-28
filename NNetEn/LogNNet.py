@@ -13,27 +13,49 @@ import math
 
 @njit(cache=True, fastmath=True)
 def Fout(input : types.float64[:]) -> types.float64[:]:
+    """
+    Logistic activation function (1 / (1 + exp(-1 * value))
+        :param input: The meaning of the neuron
+        :return: Neuron value after activation
+    """
     return np.divide(1, np.add(1, np.exp(-input)))
 
 @njit(cache=True, fastmath=True)
-# Calculation of neurons of the first hidden layer
 def back_prop_calc_first_layer(Y, W, Sh_max,
                                Sh_min, Sh_mean):
-
+    """
+    Calculation of neurons of the first hidden layer
+        :param Y: Input vector
+        :param W: Weight Matrix
+        :param Sh_max, Sh_min and Sh_mean: Normalization coefficient
+        :return: The value of the neurons of one hidden layer
+    """
     Sh = np.sum(np.multiply(Y, W), axis=1)
     Sh = np.divide(Sh - Sh_min, Sh_max - Sh_min) \
                     - 0.5 - Sh_mean
     return np.hstack((np.ones(1), Sh)) # bias
 
 @njit(cache=True, fastmath=True)
-# Calculation of neurons in hidden layers (second and further)
 def back_prop_calc_value(S, W):
+    """
+    Calculation of neurons in hidden layers (second and further)
+        :param S: The value of the neurons of the past hidden layer
+        :param W: Weight Matrix
+        :return: The value of the neurons of hidden layer
+    """
     Sh_next = np.sum(np.multiply(S, W), axis=1)
     return Fout(Sh_next)
 
 @njit(cache=True, fastmath=True)
-# weight training
 def weight_training(W, err, Sh, NORMA):
+    """
+    Weight training function
+        :param W: Weight Matrix
+        :param err: Error vector computed backpropagation method
+        :param Sh: The value of the neurons of hidden layer
+        :param NORMA: -
+        :return: Weight matrix after backpropagation
+    """
     dW = np.empty_like(W)
     dW[:] = Sh * NORMA
     dW2 = dW * err.reshape((-1, 1))
@@ -41,27 +63,57 @@ def weight_training(W, err, Sh, NORMA):
 
 @njit(cache=True, fastmath=True)
 def err_calc(Sh: types.float64[:]) -> types.float64[:]:
+    """
+    Calculate errors
+        :param Sh: The value of the neurons of hidden layer
+        :return: Error vector
+    """
     return Sh * (1 - Sh)
 
 @njit(cache=True, fastmath=True)
 def err_calc_hid_layers(err: types.float64[:], W : types.float64[:]) \
         -> types.float64[:]:
+    """
+    Error Calculation on Hidden Layers (intermediate function)
+        :param err: Error vector
+        :param W: Weight Matrix
+        :return: Error vector
+    """
     return np.sum(np.multiply(err, W.T), axis=1)
 
 @njit(cache=True, fastmath=True)
 def err_calc_last_layer(techer, Sh):
+    """
+    Error Calculation on Last Layer
+        :param techer: reference vector
+        :param Sh: The value of the neurons of hidden layer
+        :return: Error vector
+    """
     return (techer - Sh) * err_calc(Sh)
 
 @njit(cache=True, fastmath=True)
 def err_calc_rest_layers(Sh, err_prev, W_prev):
+    """
+    Error Calculation on Hidden Layers
+        :param Sh: The value of the neurons of hidden layer
+        :param err_prev: The error vector of the previous layer
+        :param W_prev: Weight matrix of the previous layer
+        :return: Error vector
+    """
     return err_calc(Sh) * err_calc_hid_layers(err_prev, W_prev)
 
 # Step 3
 @njit(cache=True, fastmath=True)
-def formation_W1_coef_time_series(xn_params, conf_layers,
-                                  W1, method=5):
-    Y = conf_layers[0] + 1
-    P = conf_layers[1]
+def formation_W1_coef_time_series(xn_params, W1, method=5):
+    """
+    Formation of the weight matrix from the time series
+        :param xn_params: Time series
+        :param W1: Weight matrix
+        :param method: One of 6 methods for forming a reservoir matrix
+        :return: Weight matrix W1
+    """
+    Y = W1.shape[1]#conf_layers[0] + 1
+    P = W1.shape[0]#conf_layers[1]
     k = 0
     if (method == 1): # line by line doubling
         for i in range(P):
@@ -164,6 +216,12 @@ def formation_W1_coef_time_series(xn_params, conf_layers,
 # Step 4
 @njit(cache=True, fastmath=True)
 def calculation_min_max_params(database, W1):
+    """
+    Calculation of minimum and maximum normalization vectors
+        :param database: database
+        :param W1: Weight matrix W1
+        :return: minimum and maximum normalization vectors
+    """
     Sh_max = np.zeros(W1.shape[0], dtype=np.float64)  # P
     Sh_min = np.empty(W1.shape[0], dtype=np.float64)  # P
     Sh_min[:] = 100
@@ -179,6 +237,12 @@ def calculation_min_max_params(database, W1):
 #Step 5
 #@njit(cache=True, fastmath=True)
 def calculation_normalization_params(database, W1):
+    """
+    Calculation normalization params
+        :param database: Normalized database
+        :param W1: Weight matrix W1
+        :return: minimum, maximum and mean normalization vectors
+    """
     Sh_max, Sh_min = calculation_min_max_params(database, W1)
     # If the base is less than 1000, then the entire base
     meanS_size = min([1000, database.shape[0]])
@@ -211,6 +275,12 @@ def formation_matrix_Wn(num, conf_layers, xr_coef=0):
     return W_list
 
 def formation_reservoir_coef(conf_layers, LCG):
+    """
+    Formation of the matrix of weights using the linear congruential generator
+        :param conf_layers: Neural network layer configuration
+        :param LCG: List to coefficients the linear congruential generator
+        :return: Weight matrix W1
+    """
     W1 = np.empty((conf_layers[0] + 1, conf_layers[1]))  # (Y+1, P)
     # LCG = ("K", "D", "L", "C")
     zn = LCG[3]
@@ -225,6 +295,13 @@ def formation_reservoir_coef(conf_layers, LCG):
 @njit(cache=True, fastmath=True)
 def calculation_neuron_first_layer(norm_data, W1,
                                    Sh_max, Sh_min, Sh_mean):
+    """
+    Calculation of neurons of the first hidden layer over the entire database
+        :param norm_data: Normalized database
+        :param W1: Weight matrix W1
+        :param Sh_max, Sh_min and Sh_mean: Normalization coefficient
+        :return: Matrix Sh containing the values of the neurons of the first hidden layer
+    """
     Sh = np.zeros((norm_data.shape[0], Sh_max.shape[0]+1),
                   dtype=np.float64)
     for index in range(norm_data.shape[0]):
@@ -235,6 +312,16 @@ def calculation_neuron_first_layer(norm_data, W1,
 @njit(cache=True, fastmath=True)
 def calc_metric(model : np.ndarray, Sout: np.ndarray,
                 metric : str) -> np.float64:
+    """
+    Calculating the entropy value from a metric
+        :param model: Reference Vector
+        :param Sout: The result of the neural network
+        :param metric, 'Acc' - accuracy metric,
+                    'R2E' - R2 Efficiency metric,
+                    'PE' - Pearson Efficiency metric.
+        :return: NNetEn – the entropy value
+    """
+
     if metric == 'Acc':
         if (np.argmax(model) == np.argmax(Sout)):
             return 1
