@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 def readme():
   with open('README.md', 'r') as f:
@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-		'Programming Language :: Python :: 3.8',
+		'Programming Language :: Python :: > 3.8',
 		'Operating System :: OS Independent',
         'License :: OSI Approved :: BSD License',
 	            ],

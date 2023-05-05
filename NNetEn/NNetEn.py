@@ -19,7 +19,6 @@ from .database import read_database_mnist, \
 from .LogNNet import *
 from numba.typed import List
 import os
-from datetime import datetime
 
 class init_database(object):
     __dir = os.path.dirname(os.path.abspath(__file__))
@@ -31,7 +30,7 @@ class init_database(object):
             :param database: (default = D1) Select dataset,
                             D1 – MNIST;
                             D2 – SARS-CoV-2-RBV1.
-            :param mu: (default = 1) usage fraction of the selected dataset (0.01 … 1).
+            :param mu: (default = 1) usage fraction of the selected dataset (0.01 .. 1).
             :return: Instance of class init_database
         """
 
@@ -69,7 +68,7 @@ class init_database(object):
     def __read_mnist_database(self, mu : int):
         """
         Read database mnist and data normalization (0 to 1)
-            :param mu: Usage fraction of the selected database (0.01 … 1)
+            :param mu: Usage fraction of the selected database (0.01 to 1)
             :return: Arrays of training and test data, as well as their labels.
         """
         # Step 1
@@ -110,7 +109,7 @@ class init_database(object):
     def __read_covid19_database(self, mu : int):
         """
         Read database SARS-CoV-2-RBV1 and data normalization (0 to 1)
-            :param mu: Usage fraction of the selected database (0.01 … 1)
+            :param mu: Usage fraction of the selected database (0.01 to 1)
             :return: Arrays of training and test data, as well as their labels.
         """
         # Step 1
@@ -157,7 +156,7 @@ class NNetEn_entropy(init_database):
         """
         Validation of input data
             :param time_series: type -> np.ndarray
-            :param epoch: type -> int
+            :param epoch: type -> int [> 0]
             :param method: type -> int [1 .. 6]
             :param metric: type -> str
             :param log: type -> bool
@@ -261,14 +260,14 @@ class NNetEn_entropy(init_database):
 
         self.NNetEn = np.mean(metric_NNetEn)
 
-    def calculation(self, time_series, method=5,
+    def calculation(self, time_series, method=3,
                         epoch=20, metric='Acc', log=False):
         """
         Command to calculation a NNetEn parameter
             :param time_series: input data with a time series in numpy array format.
             :param epoch: (default = 20). The number of training epochs for the
                         LogNNet neural network, with a number greater than 0.
-            :param method: (default = 5) One of 6 methods for forming a reservoir
+            :param method: (default = 3) One of 6 methods for forming a reservoir
                         matrix from the time series M1 ... M6.
             :param metric: (default = 'Acc') 'Acc' - accuracy metric,
                         'R2E' - R2 Efficiency metric,
@@ -310,14 +309,13 @@ class NNetEn_entropy(init_database):
             :return: The file is created with the parameters used in the calculations
         """
         dist_log = {
-            "Timestamp" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "NNetEn" : str(self.NNetEn),
             "Calculation Time" : round(calc_time, 4),
             "Epoch" : epoch,
             "Metric" : metric,
-            "Matrix W1 size" : self.W1.size,
+            "W1 size" : self.W1.size,
             "Database" : self.database,
-            "Mu coefficient" : self.mu,
+            "Coef. mu" : self.mu,
             "Length Time Series" : time_serises_size
         }
 

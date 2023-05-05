@@ -1,18 +1,15 @@
-[![License](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+![PyPI - License](https://img.shields.io/pypi/l/NNetEn?color=blue&label=License)
 [![DOI](https://img.shields.io/badge/DOI-arxiv-green)](https://arxiv.org/abs/2303.17995)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/NNetEn?label=PyPI%20dowloads)
+![PyPI](https://img.shields.io/pypi/v/NNetEn?color=informational&label=PyPI%20version)
 
 # Neural Network Entropy (NNetEn)
 
-Entropy measures are effective features for time series classification problems. Traditional entropy measures, such as Shannon entropy, use probability distribution function. However, for the effective separation of time series, new entropy estimation methods are required to characterize the chaotic dynamic of the system. Our concept of Neural Network Entropy (NNetEn) is based on the classification of special datasets (MNIST-10 and SARS-CoV-2-RBV1) in relation to the entropy of the time series recorded in the reservoir of the LogNNet neural network. NNetEn estimates the chaotic dynamics of time series in an original way. Based on the NNetEn algorithm, we propose two new classification metrics: R2 Efficiency and Pearson Efficiency. 
+Entropy measures are effective features for time series classification problems. Traditional entropy measures, such as Shannon entropy, use probability distribution function. However, for the effective separation of time series, new entropy estimation methods are required to characterize the chaotic dynamic of the system. Our concept of Neural Network Entropy (NNetEn) is based on the classification of special datasets (MNIST-10 and [SARS-CoV-2-RBV1](https://data.mendeley.com/datasets/8hdnzv23x7)) in relation to the entropy of the time series recorded in the reservoir of the LogNNet neural network. NNetEn estimates the chaotic dynamics of time series in an original way. Based on the NNetEn algorithm, we propose two new classification metrics: R2 Efficiency and Pearson Efficiency. 
 
-## Article
-The published article can be found at the link. [Manuscript](https://arxiv.org/abs/2303.17995 "arxiv.org")
+## Citing the Work
 
-##### Bibliographic link:
-
-## Dataset
-You can separately download the used datasets from the links [MNIST-10](https://yann.lecun.com/exdb/mnist/) and
-[SARS-CoV-2-RBV1](https://data.mendeley.com/datasets/8hdnzv23x7)
+[Manuscript](https://arxiv.org/abs/2303.17995 "arxiv.org")
 
 ## Installation
 
@@ -31,7 +28,7 @@ pip install NNetEn
  NNetEn = NNetEn_entropy(database='D1', mu=1)
 ```
 Arguments:
-- database: (default = D1) Select dataset, D1: MNIST, D2 :SARS-CoV-2-RBV1
+- database: (default = D1) Select dataset (D1: MNIST, D2 :SARS-CoV-2-RBV1)
 - mu: (default = 1) Usage fraction of the selected database (0.01 .. 1).
 
 **Output:** The LogNNet neural network is operated using normalized training and test
