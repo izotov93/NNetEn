@@ -1,5 +1,4 @@
-![PyPI - License](https://img.shields.io/pypi/l/NNetEn?color=blue&label=License)
-[![DOI](https://img.shields.io/badge/DOI-arxiv-green)](https://arxiv.org/abs/2303.17995)
+[![DOI](https://img.shields.io/badge/DOI-10.3390%2Fa16050255-blue)](https://www.mdpi.com/1999-4893/16/5/255)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/NNetEn?label=PyPI%20dowloads)
 ![PyPI](https://img.shields.io/pypi/v/NNetEn?color=informational&label=PyPI%20version)
 
@@ -9,8 +8,13 @@ Entropy measures are effective features for time series classification problems.
 
 ## Citing the Work
 
-[Manuscript](https://arxiv.org/abs/2303.17995 "arxiv.org")
+[Link to article](https://www.mdpi.com/1999-4893/16/5/255 "mdpi.com")
 
+```shell
+Velichko, A., Belyaev, M., Izotov, Y., Murugappan, M., & Heidari, H. (2023). 
+Neural Network Entropy (NNetEn): Entropy-based EEG signal and chaotic time series classification, Python package for NNetEn calculation. 
+Algorithms, 16(5), 255. doi:10.3390/a16050255
+```
 ## Installation
 
 Installation is done from pypi using the following command

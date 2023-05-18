@@ -15,8 +15,7 @@ logging.basicConfig(
 
 import numpy as np
 from numba import njit
-from datetime import datetime
-import os
+from sys import exit
 
 def read_mnist_images(file_name : str, limit=1):
     """
@@ -73,7 +72,7 @@ def T_pattern_load(pattern_file : str):
                 data_list.append(st_list)
     except:
         logging.info('Error read file %s', pattern_file)
-        exit()
+        exit(0)
     pattern = []
     for el in data_list:
         pattern.append((int(el[1]) - 1) * 28 + int(el[0]))
@@ -122,7 +121,7 @@ def read_database_covid19(file_name: str, limit=1):
         train_data = np.loadtxt(file_name, delimiter='\t')
     except:
         logging.error('File %s database not found', file_name)
-        exit()
+        exit(0)
 
     # Restriction on reading data
     limit = round(limit * train_data.shape[0])
@@ -168,7 +167,7 @@ def read_database_mnist(file_name_image: str,
                                       limit)
     except:
         logging.error('Error read MNIST database')
-        exit()
+        exit(0)
     train_data = data_pattern_transform(train_data, file_pattern)
 
     test_data_array = np.zeros((test_data.shape[0], 10))
@@ -206,6 +205,7 @@ def normalization(input, max_data, min_data):
     return norm_data
 
 # Step 2
+@njit(cache=True, fastmath=True)
 def format_norm_database(database, max_data, min_data):
     """
     Database normalization function

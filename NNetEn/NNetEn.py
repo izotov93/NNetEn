@@ -19,6 +19,7 @@ from .database import read_database_mnist, \
 from .LogNNet import *
 from numba.typed import List
 import os
+from sys import exit
 
 class init_database(object):
     __dir = os.path.dirname(os.path.abspath(__file__))
