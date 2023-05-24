@@ -22,6 +22,11 @@ Installation is done from pypi using the following command
 ```shell
 pip install NNetEn
 ```
+To update installed package to their latest versions, use the ```--upgrade``` option with ```pip install```
+```shell
+pip install --upgrade NNetEn
+```
+
 
 ## Usage
 

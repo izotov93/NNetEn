@@ -205,7 +205,6 @@ def normalization(input, max_data, min_data):
     return norm_data
 
 # Step 2
-@njit(cache=True, fastmath=True)
 def format_norm_database(database, max_data, min_data):
     """
     Database normalization function
