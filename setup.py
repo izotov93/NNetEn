@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.0.5'
+VERSION = '1.0.7'
 
 def readme():
   with open('README.md', 'r') as f:
     return f.read()
 
 requirements = [
-    'numba==0.56.2',
-    'numpy==1.23.3'
+    'numba==0.57.1',
+    'numpy==1.24.4'
 ]
 
 setup(
