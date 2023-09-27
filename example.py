@@ -23,73 +23,71 @@ config = {
     'mu': 1,
     'method': 3,
     'metric': 'Acc',
-    'epoch':  5,
-    'read_mode' : 'Rows'
+    'epoch': 5,
+    'read_mode': 'Rows'
 }
 
-def transpouse(mat):
+
+def reading_by_columns(mat: list) -> list:
     matrix = []
     for i in range(len(mat[0])):
         matrix.append(list())
         for j in range(len(mat)):
             try:
                 matrix[i].append(mat[j][i])
-            except:
-                break
+            except Exception as e:
+                print(e)
     return matrix
 
-def read_file_time_series(input_file : str, mode='Rows'):
+
+def read_file_time_series(input_file: str, mode='Rows') -> list:
     result = []
     with open(input_file) as file:
         line_list = file.readlines()
         for lines in line_list:
-            lines = re.sub(r'[ \t]+', ' ',
-                           re.sub(r'[^(0-9.\- \t)]',
-                                  '', lines.strip()), 0)
+            lines = re.sub(r'[^(0-9.,\-eE \t)]', '', lines.strip())
+            lines = lines.replace(',', '.')
+            lines = re.sub(r'[ \t]+', ' ', lines, 0)
             if lines != '':
                 result.append(lines.split(' '))
 
     if mode == 'Columns':
-        result = transpouse(result)
+        result = reading_by_columns(result)
 
     return [np.array(data).astype(float) for data in result]
+
 
 def main():
     # Print Configuration
     print('Running calculations with configuration:')
-    print('Dataset - {}, mu - {}'.format(
-        config['ds'], str(config['mu'])))
+    print('Dataset - {}, mu - {}'.format(config['ds'], str(config['mu'])))
     print('Method - {}, Metric - {}, Epoch - {}'.format
-          (str(config['method']), config['metric'],
-           str(config['epoch'])))
-    print("Reading by {} from {}".format(config['read_mode'],
-                                                config['file']))
+          (str(config['method']), config['metric'], str(config['epoch'])))
+    print("Reading by {} from {}".format(config['read_mode'], config['file']))
 
     # Reading the file containing time series
-    time_seties = read_file_time_series(config['file'], config['read_mode'])
-    print("Read {} time series".format(len(time_seties)))
+    time_series = read_file_time_series(config['file'], config['read_mode'])
+    print("Read {} time series".format(len(time_series)))
 
     # Creating a class with the selected database
     NNetEn = NNetEn_entropy(database=config['ds'], mu=config['mu'])
 
     #  Calculation the NNetEn value
     result = []
-    for series in time_seties:
-        value = NNetEn.calculation(series,
-                                   epoch=config['epoch'],
-                                   method=config['method'],
-                                   metric=config['metric'],
-                                   log=False)
+    for series in time_series:
+        value = NNetEn.calculation(series, epoch=config['epoch'], method=config['method'],
+                                   metric=config['metric'], log=False)
         print("NNetEn = {}".format(value))
         result.append(value)
 
     # Formation of the result file name
     file_result = re.sub(r'^file', '', '_'.join([str(key) + str(value)
-                         for key, value in config.items()])) + '.txt'
+                                                 for key, value in config.items()])) + '.txt'
 
     print('Write results to file {}'.format(file_result))
     with open(file_result, 'w') as file:
         file.write("\n".join(str(item) for item in result))
+
 
 if __name__ == '__main__':
     main()
