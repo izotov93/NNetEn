@@ -1,14 +1,15 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.0.7'
+VERSION = '1.0.8'
+
 
 def readme():
-  with open('README.md', 'r') as f:
-    return f.read()
+    with open('README.md', 'r') as f:
+        return f.read()
+
 
 requirements = [
-    'numba==0.57.1',
-    'numpy==1.24.4'
+    'numba>=0.57.1'
 ]
 
 setup(
@@ -25,10 +26,10 @@ setup(
     packages=find_packages(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-		'Programming Language :: Python :: 3.8',
-		'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.11',
+        'Operating System :: OS Independent',
         'License :: OSI Approved :: BSD License',
-	            ],
+    ],
     python_requires='>=3.8',
     package_data={"NNetEn.Database": ["*.txt",
                                       "*.idx3-ubyte",

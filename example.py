@@ -81,8 +81,9 @@ def main():
         result.append(value)
 
     # Formation of the result file name
-    file_result = re.sub(r'^file', '', '_'.join([str(key) + str(value)
-                                                 for key, value in config.items()])) + '.txt'
+    file_result = re.sub(r'^file', '',
+                         '_'.join([str(key) + str(value)
+                                   for key, value in config.items()])) + '.txt'
 
     print('Write results to file {}'.format(file_result))
     with open(file_result, 'w') as file:
